@@ -38,7 +38,7 @@ ET can also run on *host computers* (Windws, Lunux, macOS) in console mode (in t
 <p align="center"><img src="img/ET-host.png"/></p>
 
 # ET Code Organization
-ET consists of one small header file ([<b>et.h</b>](et.h)) and one small source file ([<b>et.c</b>](et.c)), which are both located in the root directory of the ET distribution. Additionally, the ET ditro contains [examples](examples) and embedded code for the [STM32 NUCLEO-L152RE board](#running-on-embedded-board) (other boards can be added following that simple example).
+ET consists of one small header file ([<b>et.h</b>](et.h)) and one small source file ([<b>et.c</b>](et.c)), which are both located in the root directory of the ET distribution. Additionally, the ET ditro contains [examples](examples) and embedded code for the [STM32 NUCLEO-C031C6 board](#running-on-embedded-board) (other boards can be added following that simple example).
 
 ```
 Embedded-Test/     - root of the Embedded Test distribution
@@ -57,9 +57,9 @@ Embedded-Test/     - root of the Embedded Test distribution
 |   |          test.c    - text fixture (see below)
 |   |          Makefile  - makefile for testing on the host
 |   |          ek-tm4c123gxl.mak  - makefile for EK-TM4C123GXL board (GNU-ARM)
-|   |          nucleo-l152re.mak  - makefile for NUCLEO-L152RE board (GNU-ARM)
+|   |          nucleo-c031c6.mak  - makefile for NUCLEO-C031C6 board (GNU-ARM)
 |   |          ek-tm4c123gxl.uvprojx - Keil-MDK project for EK-TM4C123GXL board
-|   |          bsp_nucleo-l152re.c - BSP for NUCLEO-L152RE
+|   |          bsp_nucleo-c031c6.c - BSP for NUCLEO-C031C6
 |   |
 |   +---basic_cpp/ - basic example of testing C++ CUT
 |   |          ...
@@ -69,7 +69,7 @@ Embedded-Test/     - root of the Embedded Test distribution
 |
 +---3rd_party/     - 3rd-party code needed for embedded examples
 |   +---ek-tm4c123gxl/ - code for the EK-TM4C123GXL (TivaC LaunchPad) board
-|   +---nucleo-l152re  - code for the STM32 NUCLEO-L152RE board
+|   +---nucleo-c031c6  - code for the STM32 NUCLEO-C031C6 board
 
 ```
 > **NOTE**<br>
@@ -211,14 +211,14 @@ This adaptation uses `<stdio.h>` for output to the console and `<stdlib.h>` for 
 
 
 ## Running ET on Embedded Board
-The ET [examples](examples/basic/test) provide a simple makefile (see [make_nucleo-l152re](examples/basic/test/make_nucleo-l152re)) to build the tests for the STM32 NUCLEO-L152RE shown below.
+The ET [examples](examples/basic/test) provide a simple makefile (see [nucleo-c031c6.mak](examples/basic/test/nucleo-c031c6.mak)) to build the tests for the STM32 NUCLEO-C031C6 shown below.
 
-<p align="center"><img src="img/bd_NUCLEO-L152RE.jpg"/></p>
+<p align="center"><img src="img/NUCLEO-C031C6.png"/></p>
 
 > **REMARK**<br>
 The STM32 NUCLEO board has been selected because it can to be programmed by simply copying the binary image to the board enumerated as a USB drive.
 
-The ET distribution contains all files requried to build the binary image for the NUCLEO-L152RE board. However, you still need to provide the GCC-ARM compiler and the serial terminal utility to receive the output produced by the board. To run the test on the STM32 NUCLEO-L152RE, you open a terminal window and type:
+The ET distribution contains all files requried to build the binary image for the NUCLEO-C031C6 board. However, you still need to provide the GCC-ARM compiler and the serial terminal utility to receive the output produced by the board. To run the test on the STM32 NUCLEO-C031C6, you open a terminal window and type:
 
 > **NOTE**<br>
 The GCC-ARM cross-compiler for Windows as well as the `make` utility are available in the [QTools collection](https://github.com/QuantumLeaps/qtools) for Windows.
@@ -226,7 +226,7 @@ The GCC-ARM cross-compiler for Windows as well as the `make` utility are availab
 ```
 cd ET\examples\basic\test
 
-make -f make_nucleo-l152re USB=g:
+make -f make_nucleo-c031c6 USB=g:
 ```
 
 The follwing screen shot shows the build process, programming the board (by copying the binary image) and the test output on the [Termite serial terminal](https://www.compuphase.com/software_termite.htm).
@@ -234,7 +234,7 @@ The follwing screen shot shows the build process, programming the board (by copy
 <p align="center"><img src="img/ET-emb-build.png"/></p>
 
 ### Embedded Adaptation Layer
-The ET adaptation layer for running tests on embedded targets implements exactly the same callback functions as the adaptation layer for the host, but is of course more complex because it uses the embedded UART. An example of adaptation layer is included in the file [examples/basic/test/bsp_nucleo-l152re.c](examples/basic/test/bsp_nucleo-l152re.c):
+The ET adaptation layer for running tests on embedded targets implements exactly the same callback functions as the adaptation layer for the host, but is of course more complex because it uses the embedded UART. An example of adaptation layer is included in the file [examples/basic/test/bsp_nucleo-c031c6.c](examples/basic/test/bsp_nucleo-c031c6.c):
 
 ```
 #include "et.h" /* ET: embedded test */
@@ -246,26 +246,43 @@ The ET adaptation layer for running tests on embedded targets implements exactly
 /*..........................................................................*/
 void ET_onInit(int argc, char *argv[]) {
     . . .
-    /* configure LED (PA.5) pin as push-pull output, no pull-up, pull-down */
-    . . .
-    USART2->BRR  = __USART_BRR(SystemCoreClock, 115200U);  /* baud rate */
-    USART2->CR3  = 0x0000U;        /* no flow control          */
-    USART2->CR2  = 0x0000U;        /* 1 stop bit               */
-    USART2->CR1  = ((1U <<  2) |   /* enable RX                */
-                    (1U <<  3) |   /* enable TX                */
-                    //(1U <<  5) |   /* enable RX interrupt */
-                    (0U << 12) |   /* 1 start bit, 8 data bits */
-                    (1U << 13));   /* enable USART             */
+    /* enable peripheral clock for USART2 */
+    RCC->APBENR1  |= (1U << 17U); /* enable USART#2 clock */
+    RCC->IOPENR   |= (1U << 0U);  /* enable GPIOA clock for UART pins */
+
+    /* Configure PA3 to USART2_RX, PA2 to USART2_TX */
+    GPIOA->AFR[0] &= ~((15U << 4U*USART2_RX_PIN) | (15U << 4U*USART2_TX_PIN));
+    GPIOA->AFR[0] |=  (( 1U << 4U*USART2_RX_PIN) | ( 1U << 4U*USART2_TX_PIN));
+    GPIOA->MODER  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN));
+    GPIOA->OSPEEDR&= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->OTYPER &= ~(( 1U <<    USART2_RX_PIN) | ( 1U <<    USART2_TX_PIN));
+    GPIOA->PUPDR  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->PUPDR  |=  (( 1U << 2U*USART2_RX_PIN) | ( 1U << 2U*USART2_TX_PIN));
+
+    USART2->BRR  = UART_DIV_SAMPLING16(SystemCoreClock, 115200U, 0U);
+    USART2->CR1  = USART_CR1_TE_Msk | USART_CR1_RE_Msk
+                   | USART_CR1_RXNEIE_RXFNEIE_Msk
+                   | USART_CR1_UE_Msk;
+    USART2->CR2  = 0x00000000U;
+    USART2->CR3  = 0x00000000U;
 }
 /*..........................................................................*/
 void ET_onPrintChar(char const ch) {
-    while ((USART2->SR & (1U << 7)) == 0U) { /* while TXE not empty */
+    while ((USART2->ISR & (1U << 7U)) == 0U) { /* while TXE not empty */
     }
-    USART2->DR = ch; /* put ch into the DR register */
+    USART2->TDR = ch; /* put ch into the DR register */
 }
 /*..........................................................................*/
 void ET_onExit(int err) {
+    (void)err;
+    /* blink the on-board LED2... */
     for (;;) {
+        unsigned volatile ctr;
+        GPIOA->BSRR = (1U << LD4_PIN); /* LED2 on */
+        for (ctr = 100000U; ctr != 0U; --ctr) {}
+        GPIOA->BSRR = (1U << (LD4_PIN + 16U)); /* LED2 off */
+        for (ctr = 200000U; ctr != 0U; --ctr) {}
     }
 }
 ```

@@ -3,6 +3,7 @@
 //============================================================================
 #include "sum.hpp" // Code Under Test (CUT)
 #include "et.h"    // ET: embedded test
+#include "dbc_assert.h" // Design By Contract (DBC) assertions
 
 extern "C" {
 
@@ -47,3 +48,16 @@ TEST("simple test (passing)") {
 
 //============================================================================
 // dependencies for the CUT
+
+extern "C" {
+
+//............................................................................
+DBC_NORETURN
+void DBC_fault_handler(char const * module, int label) {
+    VERIFY_ASSERT(module, label);
+    for (;;) { /* explicitly make it "noreturn" */
+    }
+}
+
+} // extern "C"
+

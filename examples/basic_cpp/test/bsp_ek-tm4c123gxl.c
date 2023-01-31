@@ -28,6 +28,7 @@
 * DEALINGS IN THE SOFTWARE.
 ============================================================================*/
 #include "et.h" /* ET: embedded test */
+#include "dbc_assert.h" /* Design By Contract (DBC) assertions */
 
 #include <stdbool.h>
 
@@ -36,6 +37,8 @@
 #include "sysctl.h"              /* system control driver (TI) */
 #include "gpio.h"                /* GPIO driver (TI) */
 /* add other drivers if necessary... */
+
+//DBC_MODULE_NAME("bsp_ek-tm4c123gxl")
 
 /* Local-scope objects -----------------------------------------------------*/
 /* LEDs on the board */
@@ -142,9 +145,9 @@ void ET_onExit(int err) {
 }
 
 /*..........................................................................*/
-/* error handler called from the exception handlers in the startup code */
-void Q_onAssert(char const * const module, int const loc) {
+/* fault handler called from the exception handlers in the startup code */
+void assert_failed(char const * const module, int const loc) {
     (void)module;
     (void)loc;
-    ET_onExit(-1);
+    DBC_fault_handler(module, loc);
 }

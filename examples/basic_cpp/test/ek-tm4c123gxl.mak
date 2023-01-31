@@ -151,11 +151,11 @@ BIN_DIR := build_$(TARGET)
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -std=c99 -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES)
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -std=c++11 -mthumb -Wall \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES)
 

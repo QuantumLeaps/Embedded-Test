@@ -32,7 +32,7 @@
 #define ET_H_
 
 /* Embedded Test (ET) version */
-#define ET_VERSION "1.0.0"
+#define ET_VERSION "2.0.0"
 
 /*! macro to define a test group */
 #define TEST_GROUP(name_) \
@@ -49,11 +49,14 @@
 
 /*! macro to verify a test expectation */
 #define VERIFY(cond_) \
-    ((cond_) ? (void)0 : ET_fail_(#cond_, &ET_group_[0], __LINE__))
+    ((cond_) ? (void)0 : ET_fail(#cond_, &ET_group_[0], __LINE__))
+
+#define VERIFY_ASSERT(module_, label_) \
+    ET_verify_assert_((module_), (label_))
 
 /*! macro to force a failure of a test */
 #define FAIL(note_) \
-    (ET_fail_(note_, &ET_group_[0], __LINE__))
+    (ET_fail(note_, &ET_group_[0], __LINE__))
 
 #ifndef ARRAY_NELEM
 /*! convenience macro to provide the number of elements in the array a_ */
@@ -72,10 +75,14 @@ void ET_onInit(int argc, char *argv[]);
 void ET_onPrintChar(char const ch);
 void ET_onExit(int err);
 
+/* public helpers */
+void ET_fail(char const *cond, char const *group, int line);
+void ET_expect_assert(char const *module, int label);
+void ET_verify_assert_(char const *module, int label);
+
 /* private helpers */
 void ET_run_(void);
 int  ET_test_(char const *title, int skip);
-void ET_fail_(char const *cond, char const *module, int line);
 extern char const ET_group_[];
 
 #ifdef __cplusplus
