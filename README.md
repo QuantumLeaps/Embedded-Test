@@ -239,7 +239,7 @@ The ET adaptation layer for running tests on embedded targets implements exactly
 ```
 #include "et.h" /* ET: embedded test */
 
-#include "stm32l1xx.h"  /* CMSIS-compliant header file for the MCU used */
+#include "stm32c0xx.h"  /* CMSIS-compliant header file for the MCU used */
 /* add other drivers if necessary... */
 
 . . .
