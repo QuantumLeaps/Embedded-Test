@@ -28,9 +28,9 @@
 # IN THE SOFTWARE.
 ##############################################################################
 # examples of invoking this Makefile:
-# make -f make_nucleo-c031c6 USB=e:
-# make -f make_nucleo-c031c6 USB=e: clean
-# make -f make_nucleo-c031c6 USB=e: flash
+# make -f nucleo-c031c6.mak USB=e:
+# make -f nucleo-c031c6.mak USB=e: clean
+# make -f nucleo-c031c6.mak USB=e: flash
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which

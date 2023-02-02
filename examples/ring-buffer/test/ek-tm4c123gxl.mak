@@ -28,9 +28,9 @@
 # IN THE SOFTWARE.
 ##############################################################################
 # examples of invoking this Makefile:
-# make -f make_ek-tm4c123gxl
-# make -f make_ek-tm4c123gxl clean
-# make -f make_ek-tm4c123gxl flash
+# make -f ek-tm4c123gxl.mak
+# make -f ek-tm4c123gxl.mak clean
+# make -f ek-tm4c123gxl.mak flash
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
