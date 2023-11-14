@@ -28,12 +28,9 @@
 * DEALINGS IN THE SOFTWARE.
 ============================================================================*/
 #include "et.h" /* ET: embedded test */
-#include "dbc_assert.h" /* Design By Contract (DBC) assertions */
 
 #include "stm32c0xx.h"  /* CMSIS-compliant header file for the MCU used */
 /* add other drivers if necessary... */
-
-//DBC_MODULE_NAME("bsp_nucleo-c031c6")
 
 /* Local-scope objects -----------------------------------------------------*/
 /* LED pins available on the board (just one user LED LD2--Green on PA.5) */
@@ -122,5 +119,5 @@ void ET_onExit(int err) {
 void assert_failed(char const * const module, int const loc) {
     (void)module;
     (void)loc;
-    DBC_fault_handler(module, loc);
+    ET_onExit(-1);
 }

@@ -28,14 +28,8 @@
 * DEALINGS IN THE SOFTWARE.
 ============================================================================*/
 #include "et.h" /* ET: embedded test */
-#include "dbc_assert.h" /* Design By Contract (DBC) assertions */
-
-#include <stdbool.h>
 
 #include "TM4C123GH6PM.h"        /* the device specific header (TI) */
-#include "rom.h"                 /* the built-in ROM functions (TI) */
-#include "sysctl.h"              /* system control driver (TI) */
-#include "gpio.h"                /* GPIO driver (TI) */
 /* add other drivers if necessary... */
 
 //DBC_MODULE_NAME("bsp_ek-tm4c123gxl")
@@ -149,5 +143,5 @@ void ET_onExit(int err) {
 void assert_failed(char const * const module, int const loc) {
     (void)module;
     (void)loc;
-    DBC_fault_handler(module, loc);
+    ET_onExit(-1);
 }

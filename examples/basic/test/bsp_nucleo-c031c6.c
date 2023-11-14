@@ -75,27 +75,25 @@ void ET_onInit(int argc, char *argv[]) {
     GPIOA->PUPDR   &= ~((3U << 2U*LD4_PIN));
 
     /* enable peripheral clock for USART2 */
-    RCC->APBENR1  |= (1U << 17U);   /* Enable USART#2 clock */
-    /* NOTE: GPIOA for USART2 pins already enabled */
+    RCC->APBENR1  |= (1U << 17U); /* enable USART#2 clock */
+    RCC->IOPENR   |= (1U << 0U);  /* enable GPIOA clock for UART pins */
 
     /* Configure PA3 to USART2_RX, PA2 to USART2_TX */
     GPIOA->AFR[0] &= ~((15U << 4U*USART2_RX_PIN) | (15U << 4U*USART2_TX_PIN));
-    GPIOA->AFR[0] |=  (( 7U << 4U*USART2_RX_PIN) | ( 7U << 4U*USART2_TX_PIN));
-    GPIOA->OSPEEDR&= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
-    GPIOA->OTYPER &= ~((1U <<     USART2_RX_PIN) | ( 1U <<    USART2_TX_PIN));
-    GPIOA->PUPDR  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->AFR[0] |=  (( 1U << 4U*USART2_RX_PIN) | ( 1U << 4U*USART2_TX_PIN));
     GPIOA->MODER  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
     GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN));
+    GPIOA->OSPEEDR&= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->OTYPER &= ~(( 1U <<    USART2_RX_PIN) | ( 1U <<    USART2_TX_PIN));
+    GPIOA->PUPDR  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->PUPDR  |=  (( 1U << 2U*USART2_RX_PIN) | ( 1U << 2U*USART2_TX_PIN));
 
-    //USART2->PRESC = 0x00000U;
     USART2->BRR  = UART_DIV_SAMPLING16(SystemCoreClock, 115200U, 0U);
-    USART2->CR3  = 0x0000U;        /* no flow control          */
-    USART2->CR2  = 0x0000U;        /* 1 stop bit               */
-    USART2->CR1  = ((1U <<  2U) |  /* enable RX                */
-                    (1U <<  3U) |  /* enable TX                */
-                    //(1U <<  5U) |   /* enable RX interrupt */
-                    (0U << 12U) |  /* 1 start bit, 8 data bits */
-                    (1U << 13U));  /* enable USART             */
+    USART2->CR1  = USART_CR1_TE_Msk | USART_CR1_RE_Msk
+                   | USART_CR1_RXNEIE_RXFNEIE_Msk
+                   | USART_CR1_UE_Msk;
+    USART2->CR2  = 0x00000000U;
+    USART2->CR3  = 0x00000000U;
 }
 /*..........................................................................*/
 void ET_onPrintChar(char const ch) {
@@ -117,9 +115,9 @@ void ET_onExit(int err) {
 }
 
 /*..........................................................................*/
-/* error handler called from the exception handlers in the startup code */
-void DBC_fault_handler(char const * const module, int const label) {
+/* fault handler called from the exception handlers in the startup code */
+void assert_failed(char const * const module, int const loc) {
     (void)module;
-    (void)label;
+    (void)loc;
     ET_onExit(-1);
 }

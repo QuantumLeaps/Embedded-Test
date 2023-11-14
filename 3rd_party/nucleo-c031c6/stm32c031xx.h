@@ -420,7 +420,7 @@ typedef struct
   __IO uint32_t CFGR2;          /*!< SYSCFG configuration register 2,                   Address offset: 0x18 */
        uint32_t RESERVED1[8];   /*!< Reserved                                                    0x1C --0x38 */
   __IO uint32_t CFGR3;          /*!< SYSCFG configuration register 3,                   Address offset: 0x3C */
-       uint32_t RESERVED2[16];  /*!< Reserved                                                    0x40 --0x7C */  
+       uint32_t RESERVED2[16];  /*!< Reserved                                                    0x40 --0x7C */
   __IO uint32_t IT_LINE_SR[32]; /*!< SYSCFG configuration IT_LINE register,             Address offset: 0x80 */
 } SYSCFG_TypeDef;
 
@@ -6590,7 +6590,7 @@ typedef struct
 #define IS_DMA_ALL_INSTANCE(INSTANCE) (((INSTANCE) == DMA1_Channel1) || \
                                        ((INSTANCE) == DMA1_Channel2) || \
                                        ((INSTANCE) == DMA1_Channel3))
-                                       
+
 /******************************** DMAMUX Instances ****************************/
 #define IS_DMAMUX_ALL_INSTANCE(INSTANCE) ((INSTANCE) == DMAMUX1)
 
