@@ -72,7 +72,7 @@ ASM_SRCS :=
 
 # C source files
 C_SRCS := \
-	div.c \
+	sum.c \
 	test.c \
 	et.c \
 	bsp_nucleo-c031c6.c \
