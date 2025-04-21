@@ -1,7 +1,7 @@
-/*============================================================================
-* ET: embedded test example for "LedDriver" from the book
-* "Test Driven Development for Embedded C" by James W. Grenning
-============================================================================*/
+//============================================================================
+// ET: embedded test example for "LedDriver" from the book
+// "Test Driven Development for Embedded C" by James W. Grenning
+//============================================================================
 
 #include "LedDriver.h"  /* Code Under Test (CUT) */
 #include "et.h"         /* ET: embedded test */
@@ -15,7 +15,7 @@ void setup(void) {
 void teardown(void) {
 }
 
-/* test group --------------------------------------------------------------*/
+// test group ----------------------------------------------------------------
 TEST_GROUP("LedDriver") {
 
 TEST("Leds Off After Create") {
@@ -85,7 +85,7 @@ TEST("Out Of Bounds Turn Off Does No Harm") {
 }
 
 SKIP_TEST("Out Of Bounds To-Do") {
-    /* TODO: what should we do during runtime? */
+    // TODO: what should we do during runtime?
     VERIFY(0);
 }
 
@@ -119,4 +119,4 @@ TEST("All Off") {
     VERIFY(0 == virtualLeds);
 }
 
-} /* TEST_GROUP() */
+} // TEST_GROUP()

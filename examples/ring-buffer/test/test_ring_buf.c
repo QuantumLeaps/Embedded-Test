@@ -1,17 +1,17 @@
-/*============================================================================
-*
-*                    Q u a n t u m  L e a P s
-*                    ------------------------
-*                    Modern Embedded Software
-*
-* Copyright (C) 2021 Quantum Leaps, LLC. All rights reserved.
-*
-* SPDX-License-Identifier: MIT
-*
-* Contact information:
-* <www.state-machine.com>
-* <info@state-machine.com>
-============================================================================*/
+//============================================================================
+//
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
+//
+// Copyright (C) 2021 Quantum Leaps, LLC. All rights reserved.
+//
+// SPDX-License-Identifier: MIT
+//
+// Contact information:
+// <www.state-machine.com>
+// <info@state-machine.com>
+//============================================================================
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -21,7 +21,7 @@
 RingBufElement buf[8];
 RingBuf rb;
 
-/* ring-buffer "handler" function for RingBuf_process_all() */
+// ring-buffer "handler" function for RingBuf_process_all()
 static void rb_handler(RingBufElement const el);
 
 static RingBufElement test_data[] = {
@@ -33,14 +33,14 @@ static RingBufElement test_data[] = {
 static RingBufCtr test_idx;
 
 void setup(void) {
-    /* executed before *every* non-skipped test */
+    // executed before *every* non-skipped test
 }
 
 void teardown(void) {
-    /* executed after *every* non-skipped and non-failing test */
+    // executed after *every* non-skipped and non-failing test
 }
 
-/* test group --------------------------------------------------------------*/
+// test group ----------------------------------------------------------------
 TEST_GROUP("lock-free ring buffer") {
 
 RingBuf_ctor(&rb, buf, ARRAY_NELEM(buf));
@@ -76,8 +76,10 @@ TEST("RingBuf_process_all test_data") {
     VERIFY(RingBuf_num_free(&rb) == ARRAY_NELEM(buf) - 1U);
 }
 
-} /* TEST_GROUP() */
+} // TEST_GROUP()
 
+// custom code for the CUT ---------------------------------------------------
+// ring-buffer "handler" function for RingBuf_process_all()
 static void rb_handler(RingBufElement const el) {
     VERIFY(test_data[test_idx] == el);
     ++test_idx;

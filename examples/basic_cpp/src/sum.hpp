@@ -1,6 +1,4 @@
-// basic ET example:
 // very simple C++ code under test (CUT)
-//
 #ifndef SUM_HPP_
 #define SUM_HPP_
 

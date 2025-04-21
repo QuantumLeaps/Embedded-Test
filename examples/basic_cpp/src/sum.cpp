@@ -1,6 +1,4 @@
-// basic ET example:
 // very simple C++ code under test (CUT)
-//
 #include "sum.hpp"
 
 namespace CUT {

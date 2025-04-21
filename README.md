@@ -28,17 +28,17 @@ in all changes and derivate works.
 
 
 # ET on Embedded Targets
-On *embedded targets*, ET requires a serial port to output test results to the host. (The host computer must be running a serial utility to visualize the output from the embedded target.) ET provides a simple adaptation layer for any UART/USART in polling mode without interrupts. Please also see [Running on Embedded Board](#running-on-embedded-board).
+On *embedded targets*, ET requires a serial port to output test results to the host. (The host computer must be running a serial utility to visualize the output from the embedded target.) ET provides a simple adaptation layer for any UART/USART in polling mode without interrupts. Please also see [Running ET on Host Computers](#et-on-host-computers).
 
 <p align="center"><img src="img/ET-emb.png"/></p>
 
 # ET on Host Computers
-ET can also run on *host computers* (Windws, Lunux, macOS) in console mode (in that case, ET takes advantage of `<stdio.h>`).
+ET can also run on *host computers* (Windows, Linux, macOS) in console mode (in that case, ET takes advantage of `<stdio.h>`).
 
 <p align="center"><img src="img/ET-host.png"/></p>
 
 # ET Code Organization
-ET consists of one small header file ([<b>et.h</b>](et.h)) and one small source file ([<b>et.c</b>](et.c)), which are both located in the root directory of the ET distribution. Additionally, the ET ditro contains [examples](examples) and embedded code for the [STM32 NUCLEO-C031C6 board](#running-on-embedded-board) (other boards can be added following that simple example).
+ET consists of one small header file ([<b>et.h</b>](et/et.h)) and one small source file ([<b>et.c</b>](et/et.c)), which are both located in the root directory of the ET distribution. Additionally, the ET distro contains [examples](examples) and embedded code for the [STM32 NUCLEO-C031C6 board](#et-on-embedded-targets) (other boards can be added following that simple example).
 
 ```
 Embedded-Test/     - root of the Embedded Test distribution
@@ -73,20 +73,24 @@ Embedded-Test/     - root of the Embedded Test distribution
 
 ```
 > **NOTE**<br>
-The example code is organized in the standard way for unit testing, into the `src` directory with the CUT and `test` directory with test-fixture and makefiles to build and run the tests.
+The example code is organized in the standard way for unit testing, into the `src` directory with the CUT and `test` directory with test-fixture and Makefiles to build and run the tests.
 
 
 # Basic ET Example in C
 Here is the basic test fixture (see [examples/basic/test/test.c](examples/basic/test/test.c)), which tests a simple `sum(x,y)` function that returns `x+y`. The explanation section following the listing highlights the main points:
 
 ```c
- [1] #include "sum.h" /* Code Under Test (CUT) */
- [2] #include "et.h"  /* ET: Embedded Test */
+ [1] #include "sum.h" // Code Under Test (CUT)
+ [2] #include "et.h"  // ET: Embedded Test
 
- [3] void setup(void) { ... }
- [4] void teardown(void) { ... }
+ [3] void setup(void) {
+         // executed before *every* non-skipped test
+     }
+ [4] void teardown(void) {
+         // executed after *every* non-skipped and non-failing test
+     }
 
-     /* test group -------------------------------------------------*/
+     // test group ---------------------------------------------------
  [5] TEST_GROUP("Basic") {
 
  [6] TEST("CUT test (passing)") {
@@ -95,21 +99,21 @@ Here is the basic test fixture (see [examples/basic/test/test.c](examples/basic/
      }
 
  [9] SKIP_TEST("test (skipped)") {
-[10]    VERIFY(3 == 2*2); /* this would fail, but it's not checked */
+[10]    VERIFY(3 == 2*2); // this would FAIL, but it's not checked
      }
 
 [11] TEST("CUT test (failing)") {
          VERIFY(5 == sum(2, 3));
-[12]     VERIFY(4 == sum(3, 2)); /* <--- fails */
+[12]     VERIFY(4 == sum(3, 2)); // <--- FAILS
      }
 
 [13] TEST("simple test (passing)") {
          VERIFY(4 == 2*2);
      }
 
-[14] } /* TEST_GROUP() */
+[14] } // TEST_GROUP()
 
-     /* dependencies for the CUT -----------------------------------*/
+     // dependencies for the CUT -------------------------------------
 [15] . . .
 ```
 
@@ -127,7 +131,7 @@ Here is the basic test fixture (see [examples/basic/test/test.c](examples/basic/
 The "test group" in ET is the "test runner" function (`ET_run()`), which executes tests specified as the body of this function.
 
 
-`[6]` The ET macro `TEST()` defines a single test. The macro takes the test name, which is arbitary string to be output to identify the test.
+`[6]` The ET macro `TEST()` defines a single test. The macro takes the test name, which is arbitrary string to be output to identify the test.
 
 `[7]` The ET macro `VERIFY()` verifies the "test assertion". The macro takes a Boolean expression, which must evaluate to 'true'. If the expression evaluates to 'false' the test fails and ET will print the group-name and line number of the failing `VERIFY()`.
 
@@ -138,22 +142,21 @@ The "test group" in ET is the "test runner" function (`ET_run()`), which execute
 `[10]` The body of a "skipped" test is not executed. Neither are the `setup()` and `teardown()` callbacks for that test. This means that the `VERIFY()` "test assertion" is not evaluated, so it does not matter whether it evaluates to 'true' or 'false'.
 
 ### Failing Test in ET
-
 `[11]` This is an example of a *failing* "test.
 
 `[12]` Typically a test fails because one of the `VERIFY()` macros evaluates to 'false', which causes the **whole test to fail**. (A test can be also forced to fail by calling the `FAIL()` macro, which provides opportunity to output a "note" as to why a test was forced to fail.)
 
 > **NOTE**<br>
-In ET, a failing test **stopps** the whole run and causes an "exit" from the test-fixture (please see [Running on Embedded Board](#running-on-embedded-board) for discussion of what "exit" means on embedded targets). The rationale is that a failing test means that the following code is not to be trusted, so continuaiton makes no sense. This aligns with the TDD workflow, which requires *fixing* any failing test before continuing with other tests.
+In ET, a failing test **stops** the whole run and causes an "exit" from the test-fixture (please see [Running on Embedded Board](#running-on-embedded-board) for discussion of what "exit" means on embedded targets). The rationale is that a failing test means that the code downstream the failure is not to be trusted (the software is in an unpredictable state), so continuation makes no sense. This aligns with the TDD workflow, which requires *fixing* any failing test before continuing with other tests.
 
-`[13]` Any `TEST()` following a failing test is *not* executed.
+`[13]` Any `TEST()` downstream a failing test is *not* executed.
 
 `[14]` The test group (see [5]) needs to be closed by a closing-brace `}`.
 
-`[15]` The test group can be foolowed by any additional code, typically implementing some dependencies of the CUT.
+`[15]` The test group can be followed by any additional code, typically implementing some dependencies of the CUT.
 
 ## Running ET on the Host
-The ET [examples](examples/basic/test) provide a simple [Makefile]([examples](examples/basic/test/Makefile) to build the tests and run them on a host (Windows, Linux, or macOS). Here is an example of running the basic test on the host (Windows command prompt in this case.)
+The ET [examples](examples/basic/test) provide a simple [Makefile]([examples](examples/basic/test/Makefile) to build the tests and run them on a host (Windows, Linux, or macOS). Here is an example of running the basic test on the host (Windows command prompt in this case.) This test intentionally fails (which is more interesting than a successful test.)
 
 ```
 C:\GitHub\ET\examples\basic\test>make
@@ -168,7 +171,7 @@ gcc -c -g -O -fno-pie -std=c11 -pedantic -Wall -Wextra -W -I. -I../src -I../../.
 gcc     -no-pie  -o build/test.exe build/sum.o build/test.o build/et.o build/bsp_host.o
 build/test.exe
 
-ET embedded test 0.0.2, https://github.com/QuantumLeaps/ET
+ET embedded test 2.1.0, https://github.com/QuantumLeaps/ET
 ---------------- group: Basic -----------------
 [1] "first test (passing)" .. PASSED
 [2] "CUT test (passing)" .. PASSED
@@ -185,24 +188,24 @@ To run the tests on Windows you need the GCC C/C++ compiler accessible in your P
 
 
 ### Host Adaptation Layer
-The ET adaptation layer for running tests on the host is very simply implemented in the file [bsp_host.c](bsp_host.c):
+The ET adaptation layer for running tests on the host is very simply implemented in the file [et_host.c](et/et_host.c):
 
-```
-#include "et.h" /* ET: embedded test */
+```c
+#include "et.h" // ET: embedded test
 
-#include <stdio.h>  /* for fputc() and stdout */
-#include <stdlib.h> /* for exit() */
+#include <stdio.h>  // for fputc() and stdout
+#include <stdlib.h> // for exit()
 
-/*..........................................................................*/
+//..........................................................................
 void ET_onInit(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 }
-/*..........................................................................*/
+//..........................................................................
 void ET_onPrintChar(char const ch) {
     fputc(ch, stdout);
 }
-/*..........................................................................*/
+//..........................................................................
 void ET_onExit(int err) {
     exit(err);
 }
@@ -211,14 +214,14 @@ This adaptation uses `<stdio.h>` for output to the console and `<stdlib.h>` for 
 
 
 ## Running ET on Embedded Board
-The ET [examples](examples/basic/test) provide a simple makefile (see [nucleo-c031c6.mak](examples/basic/test/nucleo-c031c6.mak)) to build the tests for the STM32 NUCLEO-C031C6 shown below.
+The ET [examples](examples/basic/test) provide a simple Makefile (see [nucleo-c031c6.mak](examples/basic/test/nucleo-c031c6.mak)) to build the tests for the STM32 NUCLEO-C031C6 shown below.
 
 <p align="center"><img src="img/NUCLEO-C031C6.png"/></p>
 
 > **REMARK**<br>
 The STM32 NUCLEO board has been selected because it can to be programmed by simply copying the binary image to the board enumerated as a USB drive.
 
-The ET distribution contains all files requried to build the binary image for the NUCLEO-C031C6 board. However, you still need to provide the GCC-ARM compiler and the serial terminal utility to receive the output produced by the board. To run the test on the STM32 NUCLEO-C031C6, you open a terminal window and type:
+The ET distribution contains all files required to build the binary image for the NUCLEO-C031C6 board. However, you still need to provide the GCC-ARM compiler and the serial terminal utility to receive the output produced by the board. To run the test on the STM32 NUCLEO-C031C6, you open a terminal window and type:
 
 > **NOTE**<br>
 The GCC-ARM cross-compiler for Windows as well as the `make` utility are available in the [QTools collection](https://github.com/QuantumLeaps/qtools) for Windows.
@@ -229,7 +232,7 @@ cd ET\examples\basic\test
 make -f make_nucleo-c031c6 USB=g:
 ```
 
-The follwing screen shot shows the build process, programming the board (by copying the binary image) and the test output on the [Termite serial terminal](https://www.compuphase.com/software_termite.htm).
+The following screen shot shows the build process, programming the board (by copying the binary image) and the test output on the [Termite serial terminal](https://www.compuphase.com/software_termite.htm).
 
 <p align="center"><img src="img/ET-emb-build.png"/></p>
 
